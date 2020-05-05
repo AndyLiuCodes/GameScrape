@@ -1,0 +1,17 @@
+{
+  "name": "gamescraperwebapp",
+  "version": "1.0.0",
+  "description": "Webscrapes free games from various websites",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andy Liu",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.3"
+  }
+}
