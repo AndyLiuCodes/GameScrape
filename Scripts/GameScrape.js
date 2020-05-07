@@ -99,7 +99,7 @@ var ScrapeSteam = async (numItems, url) => {
     const steamPage = await browser.newPage()
     steamPage.setViewport({width: 1920, height: 1080});
     
-    const steamURL = "https://store.steampowered.com/search/?sort_by=Reviews_DESC&maxprice=6";
+    const steamURL = url;
     
     await steamPage.goto(steamURL);
     
@@ -130,7 +130,38 @@ function extractRedditItems(){
 }
 
 function extractRedditInfo(game){
+    
+    const selector = cheerio.load(game.data);
 
+    //imgURL
+ 
+    var title = selector('.entry > .top-matter > .title > a')
+        .text()
+        .trim();
+
+    const link = game.link;
+    
+    const platform = title.substring(title.lastIndexOf("[") + 1, title.lastIndexOf("]"))
+
+    const price = title.substring(title.lastIndexOf("(") + 1, title.lastIndexOf(")"))
+
+    var free = false;
+
+    if(price.includes("100") || price.includes("FREE") || price.includes("Free") || price.includes("free")){
+        free = true;
+    }
+
+    const discounted = true;
+
+    var title = title.replace(`[${platform}] `, "");
+
+    const imgURL = selector('.thumbnail > img').attr('src')
+
+    if (imgURL == undefined){
+        imgURL == null;
+    }
+
+    return {title, imgURL, link, platform, free, discounted};
 }
 //REDDIT
 var ScrapeReddit = async (numPages, url) => {
@@ -142,13 +173,12 @@ var ScrapeReddit = async (numPages, url) => {
     const redditPage = await browser.newPage()
     redditPage.setViewport({width: 1920, height: 1080});
     
-    const redditURL = "https://old.reddit.com/r/GameDeals/hot/";
+    const redditURL = url;
     
     await redditPage.goto(redditURL);
     var allGameList = []
     //extract items
-
-    for(let i = 0; i < 2; i++){
+    for(let i = 0; i < numPages; i++){
         items = await redditPage.evaluate(extractRedditItems);
         allGameList = await allGameList.concat(items)
         
@@ -158,29 +188,38 @@ var ScrapeReddit = async (numPages, url) => {
 
     await browser.close();
     
-    var redditResults = redditResults.map((ele) => {
+    //process items
+    var redditResults = allGameList.map((ele) => {
         return extractRedditInfo(ele)
     })
-    console.log(allGameList.length)
-    //process items
 
     //return items
+    return redditResults
 }
 
+var UpdateGameDatabase = async () => {
+    
+    var allData = [];
 
+    //Scrape Free
+    const freeSteam = "https://store.steampowered.com/search/?maxprice=free"
+    freeSteamData = await ScrapeSteam(1, freeSteam)
+    console.log(freeSteamData.length)
 
+    allData = allData.concat(freeSteamData);
 
+    //Scrape special pricing
+    //const discountSteam = "https://store.steampowered.com/search/?specials=1"
 
-//ITCH.IO
-// async function ScrapeItch(){
+    // const redditURL = "https://old.reddit.com/r/GameDeals/hot/";
+    // var redditData = await ScrapeReddit(1, redditURL);
+    // console.log(`amount of reddit data is: ${redditData.length}`);
+    // allData = allData.concat(redditData);
 
-// }
-
-function UpdateGameDatabase(){
-
+    console.log(allData.length)
+    return allData;
 }
 
 module.exports = {
-    ScrapeSteam: ScrapeSteam,
-    ScrapeReddit: ScrapeReddit
+    UpdateGameDatabase: UpdateGameDatabase
 }
