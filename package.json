@@ -4,13 +4,19 @@
   "description": "Webscrapes free games from various websites",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./index.js",
+    "server": "nodemon ./index.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "Andy Liu",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
+    "concurrently": "^5.2.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "nodemon": "^2.0.3",
