@@ -1,15 +1,23 @@
-// index.js
-
 const express = require("express");
 const path = require("path");
-const GameScrape = require('./Scripts/GameScrape');
-const Pool = require('./db/connection');
+const bodyParser = require('body-parser');
+
+const games = require('./routes/api/db');
+
+const UpdateDB = require('./Scripts/UpdateDB');
 
 const app = express((req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ a: 1 }, null, 3));
 });
+
 const port = process.env.PORT || "8000";
+
+app.use(bodyParser.json());
+
+//Routes
+app.use('/api/', games);
+
 
 app.get("/", (req, res) => {
     //Get website available for the day
@@ -21,23 +29,11 @@ app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
+//Only update database in production
+if (process.env.NODE_ENV == 'production') {
+    //Initial database load on server
+    UpdateDB.updateDB();
 
-
-app.get("/hi", async (req, res) => {
-    // const results = await GameScrape.ScrapeSteam(5);
-    const results = await GameScrape.UpdateGameDatabase();
-
-    for(let i = 0; i < results.length; i++){
-        let game = results[i];
-
-        let query = `insert into gamestorage values('${game.title}', '${game.imgURL}','${game.link}', '${game.platform}' ,${game.free},${game.discounted})`;
-
-        Pool.query(query, (err, res) =>{
-            if(err){
-                console.log(err)
-            }
-        });
-    }
-    res.send(JSON.stringify(results));
-
-});
+    //Update Every 12hrs
+    setInterval(UpdateDB.updateDB, 1000 * 60 * 60 * 12); // sec -> mins -> hrs
+}
