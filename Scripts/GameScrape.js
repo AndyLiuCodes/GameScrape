@@ -202,21 +202,22 @@ var UpdateGameDatabase = async () => {
     var allData = [];
 
     //Scrape Free
-    const freeSteam = "https://store.steampowered.com/search/?maxprice=free"
-    freeSteamData = await ScrapeSteam(1, freeSteam)
-    console.log(freeSteamData.length)
+    const freeSteamURL = "https://store.steampowered.com/search/?maxprice=free"
+    let freeSteamData = await ScrapeSteam(1000, freeSteamURL)
 
     allData = allData.concat(freeSteamData);
 
     //Scrape special pricing
-    //const discountSteam = "https://store.steampowered.com/search/?specials=1"
+    const discountSteamURL = "https://store.steampowered.com/search/?specials=1"
+    let discountSteamData = await ScrapeSteam(1000, discountSteamURL)
 
-    // const redditURL = "https://old.reddit.com/r/GameDeals/hot/";
-    // var redditData = await ScrapeReddit(1, redditURL);
-    // console.log(`amount of reddit data is: ${redditData.length}`);
-    // allData = allData.concat(redditData);
+    allData = allData.concat(discountSteamData);
 
-    console.log(allData.length)
+    //Scrape reddit/r/gamedeals
+    const redditURL = "https://old.reddit.com/r/GameDeals/hot/";
+    var redditData = await ScrapeReddit(5, redditURL);
+    allData = allData.concat(redditData);
+
     return allData;
 }
 
